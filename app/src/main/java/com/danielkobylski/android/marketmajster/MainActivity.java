@@ -56,26 +56,27 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MainActivity extends AppCompatActivity {
 
-    private DrawerLayout mDrawerLayout;
-    private SearchView mSearchView;
-    private List<Product> mProductList = new ArrayList<>();
-    private RecyclerView mRecyclerView;
-    private ProductsAdapter mProductsAdapter;
-    private ButtonFlat mCategoryButton;
-    private ButtonFlat mLocButton;
-    private final String URL = "http://192.168.0.17:8080/";
-    private final int PAGE_SIZE = 6;
-    private GridLayoutManager mLayoutManager;
-    private boolean loading = true;
-    private Typeface typeface;
-    private int pageToLoad = 0;
+    private static DrawerLayout mDrawerLayout;
+    private static ImageView mLogo;
+    private static SearchView mSearchView;
+    private static List<Product> mProductList = new ArrayList<>();
+    private static RecyclerView mRecyclerView;
+    private static ProductsAdapter mProductsAdapter;
+    private static ButtonFlat mCategoryButton;
+    private static ButtonFlat mLocButton;
+    private static final String URL = "http://s12.mydevil.net:8080/barter/"; //"http://192.168.0.17:8080/";
+    private static final int PAGE_SIZE = 6;
+    private static GridLayoutManager mLayoutManager;
+    private static boolean loading = true;
+    private static Typeface typeface;
+    private static int pageToLoad = 0;
     private static final int REQUEST_CODE_NEW_LOC = 3;
     private static final int REQUEST_CODE_LOGIN = 4;
-    private TextView mLogoutTextView;
-    private TextView mLoginTextView;
-    private CircleImageView mLoginAvatar;
-    private NavigationView mNavigationView;
-    private Intent mIntent;
+    private static TextView mLogoutTextView;
+    private static TextView mLoginTextView;
+    private static CircleImageView mLoginAvatar;
+    private static NavigationView mNavigationView;
+    private static Intent mIntent;
 
 
     @Override
@@ -91,18 +92,20 @@ public class MainActivity extends AppCompatActivity {
 
         mDrawerLayout = findViewById(R.id.drawer_layout);
 
+
         mNavigationView = findViewById(R.id.nav_view);
+        mLogo = mNavigationView.getHeaderView(0).findViewById(R.id.logo);
         mLogoutTextView = mNavigationView.getHeaderView(0).findViewById(R.id.drawer_text_logout);
         mLoginTextView = mNavigationView.getHeaderView(0).findViewById(R.id.drawer_text_login);
         mLoginAvatar = mNavigationView.getHeaderView(0).findViewById(R.id.login_avatar);
 
-        SharedPreferences pref = getSharedPreferences(LoginActivity.PREFS_NAME,MODE_PRIVATE);
-        String userId = pref.getString(LoginActivity.PREFS_ID, null);
+        //SharedPreferences pref = getSharedPreferences(LoginActivity.PREFS_NAME,MODE_PRIVATE);
+        //String userId = pref.getString(LoginActivity.PREFS_ID, null);
 
         changeDrawerData(null);
-        if (userId != null) {
-            getLoggedUser(userId);
-        }
+        //if (userId != null) {
+        //    getLoggedUser(userId);
+        //}
 
 
         mNavigationView.setNavigationItemSelectedListener(
@@ -120,7 +123,8 @@ public class MainActivity extends AppCompatActivity {
                             case R.id.logout:
                                 UserTransfer.mLoggedUser = null;
                                 SharedPreferences preferences = getSharedPreferences(LoginActivity.PREFS_NAME, 0);
-                                preferences.edit().remove(LoginActivity.PREFS_ID).commit();
+                                preferences.edit().remove("login").commit();
+                                preferences.edit().remove("password").commit();
                                 changeDrawerData(null);
                                 break;
                             case R.id.add_offer:
@@ -174,6 +178,7 @@ public class MainActivity extends AppCompatActivity {
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
         mRecyclerView.setAdapter(mProductsAdapter);
 
+        LoginActivity.logRememberedUser(MainActivity.this);
         loadProductData();
 
 
@@ -387,7 +392,8 @@ public class MainActivity extends AppCompatActivity {
         requestQueue.add(jsonObjectRequest);
     }
 
-    public void changeDrawerData(User user) {
+
+    public static void changeDrawerData(User user) {
 
         if (user != null) {
             mLogoutTextView.setVisibility(View.GONE);
@@ -397,7 +403,7 @@ public class MainActivity extends AppCompatActivity {
             byte[] avatarContent = UserTransfer.mLoggedUser.getAvatarImage().getContent();
             Bitmap bmp = BitmapFactory.decodeByteArray(avatarContent, 0, avatarContent.length);
             mLoginAvatar.setImageBitmap(bmp);
-
+            mLogo.setVisibility(View.GONE);
             mLoginTextView.setText("Witaj, " + user.getName());
             mNavigationView.getMenu().setGroupVisible(R.id.user_not_logged, false);
             mNavigationView.getMenu().setGroupVisible(R.id.group_home, true);
@@ -407,7 +413,7 @@ public class MainActivity extends AppCompatActivity {
             mLogoutTextView.setVisibility(View.VISIBLE);
             mLoginAvatar.setVisibility(View.GONE);
             mLoginTextView.setVisibility(View.GONE);
-
+            mLogo.setVisibility(View.VISIBLE);
             mNavigationView.getMenu().setGroupVisible(R.id.user_not_logged, true);
             mNavigationView.getMenu().setGroupVisible(R.id.group_home, false);
             mNavigationView.getMenu().setGroupVisible(R.id.group_offers, false);

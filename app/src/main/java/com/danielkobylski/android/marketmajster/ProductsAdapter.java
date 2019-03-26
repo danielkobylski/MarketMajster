@@ -19,6 +19,7 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.ByteArrayOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
@@ -56,11 +57,12 @@ public class ProductsAdapter extends RecyclerView.Adapter<ProductsAdapter.Produc
         holder.productTitle.setText(mProductList.get(position).getName());
         //holder.productCategory.setText(mProductList.get(position).getCategory());
 
-        Log.d("image", mProductList.get(position).getName());
         if (mProductList.get(position).getImageList().size() != 0) {
             byte[] bmpArr = mProductList.get(position).getImageList().get(0).getContent();
             Bitmap bmp = BitmapFactory.decodeByteArray(bmpArr, 0, bmpArr.length);
-            Log.d("Somethings", "asdf");
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            bmp.compress(Bitmap.CompressFormat.JPEG, 50, baos);
+            bmp = BitmapFactory.decodeByteArray(baos.toByteArray(),0,baos.toByteArray().length);
             holder.productImage.setImageBitmap(bmp);
             holder.productImage.setScaleType(ImageView.ScaleType.CENTER_CROP);
         }

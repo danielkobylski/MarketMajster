@@ -50,14 +50,14 @@ public class User {
             mName = user.getString("forename");
             mLastName = user.getString("surname");
             mLogin = user.getString("login");
-            mPassword = user.getString("password");
+            mPassword = ""; //user.getString("password");
             mEmail = user.getString("email");
             mPhone = user.getString("phoneNumber");
             mAddress = user.getString("address");
             mCity = user.getString("city");
             mZipcode = user.getString("zipCode");
             mBirthDate = user.getString("birthDate");
-            mAvatarImage = new Image((long)-1,(long)-1,Base64.decode(user.getString("image"), Base64.DEFAULT));
+            mAvatarImage = new Image((long)-1,(long)-1,Base64.decode(user.getString("img"), Base64.DEFAULT));
             mFavourites = new ArrayList<>();
             JSONArray favs = user.getJSONArray("fav");
             if (favs.length() != 0) {

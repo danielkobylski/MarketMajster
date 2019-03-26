@@ -23,10 +23,14 @@ public class UserTransfer {
     public static User mLoggedUser;
     public static User mUser;
     public static User mOffertOwner;
+    public static String mToken;
+
     public static void setUser(User user) {mUser = user;}
     public static User getUser() {return mUser;}
 
     public static void setOffertOwner(User user) {mOffertOwner = user;}
     public static User getOffertOwner() {return mOffertOwner;}
 
+    public static void setToken(String token){mToken = token;}
+    public static String getToken(){return mToken;}
 }

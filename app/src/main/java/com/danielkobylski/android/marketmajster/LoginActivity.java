@@ -1,38 +1,55 @@
 package com.danielkobylski.android.marketmajster;
 
+import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.InputType;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.gc.materialdesign.views.Button;
 import com.gc.materialdesign.views.ButtonFlat;
 import com.gc.materialdesign.views.ButtonRectangle;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.w3c.dom.Text;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public class LoginActivity extends AppCompatActivity {
 
     private ButtonFlat mRegisterButton;
     private ButtonRectangle mLoginButton;
-    private TextInputEditText mLogin;
-    private TextInputEditText mPassword;
-    private CheckBox mRememberMe;
-
-    public static final String PREFS_NAME = "barter_login";
-    public static final String PREFS_ID = "16";
+    private static ProgressBar mProgressBar;
+    private static TextView mWrongInput;
+    private static TextInputEditText mLogin;
+    private static TextInputEditText mPassword;
+    private static CheckBox mRememberMe;
+    private static JSONObject mLoginData;
+    public static final String PREFS_NAME = "barter";
+    private static boolean userLogged;
+    private static final String URL1 = "http://192.168.0.17:8080/";
+    private static final String URL2 = "http://s12.mydevil.net:8080/barter/";
+    //public static final String PREFS_LOGIN = "16";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,7 +58,12 @@ public class LoginActivity extends AppCompatActivity {
 
         mLogin = (TextInputEditText) findViewById(R.id.input_login_edit_text);
         mPassword = (TextInputEditText) findViewById(R.id.input_password_edit_text);
+        mLogin.setText("daniel");
+        mPassword.setText("123");
         mRememberMe = (CheckBox) findViewById(R.id.remember_me_check_box);
+
+        mWrongInput = (TextView) findViewById(R.id.wrong_input);
+        mProgressBar = (ProgressBar)findViewById(R.id.loading);
 
         mRegisterButton = (ButtonFlat)findViewById(R.id.register_button);
         mRegisterButton.setOnClickListener(new View.OnClickListener() {
@@ -56,44 +78,131 @@ public class LoginActivity extends AppCompatActivity {
         mLoginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getUserData();
+                mLoginData = new JSONObject();
+                try {
+                    mLoginData.put("username",mLogin.getText());
+                    mLoginData.put("password", mPassword.getText());
+                    mWrongInput.setVisibility(View.GONE);
+                    mProgressBar.setVisibility(View.VISIBLE);
+                    getAccessToken(mLoginData, mRememberMe.isChecked(), LoginActivity.this);
+                }
+                catch(JSONException e) {
+                    e.printStackTrace();
+                }
             }
         });
 
 
     }
+//"http://192.168.0.17:8080/users/find/"+mLogin.getText()
 
-    public void getUserData() {
-        RequestQueue requestQueue = Volley.newRequestQueue(LoginActivity.this);
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
-                Request.Method.GET,
-                "http://192.168.0.17:8080/users/find/"+mLogin.getText(),
-                null,
+
+    public static void logRememberedUser(Activity requestingActivity) {
+
+        SharedPreferences pref = BarterApp.getSharedPrefs();
+        String login = pref.getString("login",null);
+        String password = pref.getString("password", null);
+
+        if (login != null && password != null) {
+            mLoginData = new JSONObject();
+            try {
+                mLoginData.put("username",login);
+                mLoginData.put("password", password);
+                getAccessToken(mLoginData, false, requestingActivity);
+            }
+            catch(JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public static void getAccessToken(final JSONObject loginData, final boolean rememberMe, final Activity requestingActivity) {
+
+        RequestQueue requestQueue = Volley.newRequestQueue(BarterApp.getAppContext());
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST,URL2+"api/auth/signin",loginData,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            Log.d("Response",response.getString("accessToken"));
+                            UserTransfer.setToken(response.getString("accessToken"));
+                            if(rememberMe == true) {
+                                BarterApp.getSharedPrefs()
+                                        .edit()
+                                        .putString("login", loginData.getString("username"))
+                                        .putString("password", loginData.getString("password"))
+                                        .commit();
+                            }
+                            getCurrentUser(requestingActivity);
+                        }
+                        catch(JSONException e) {
+                           int i = 2;
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        error.printStackTrace();
+                        String activityName = requestingActivity.getLocalClassName();
+                        if (activityName.equals("LoginActivity")) {
+                            mProgressBar.setVisibility(View.GONE);
+                            mWrongInput.setVisibility(View.VISIBLE);
+                        }
+                        else {
+                            Toast.makeText(requestingActivity, "Could not login with current credintials", Toast.LENGTH_LONG);
+                        }
+                    }
+                }) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String>  params = new HashMap<String, String>();
+                params.put("Authorization", "Bearer "+UserTransfer.getToken());
+                return params;
+            }
+
+        };
+        requestQueue.add(jsonObjectRequest);
+    }
+
+    public static void getCurrentUser(final Activity requestingActivity) {
+        final String activityName = requestingActivity.getLocalClassName();
+        RequestQueue requestQueue = Volley.newRequestQueue(BarterApp.getAppContext());
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET,URL2+"users/current",null,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
                         try {
                             UserTransfer.mLoggedUser = new User(response);
-                            if(mRememberMe.isChecked()==true) {
-                                getSharedPreferences(PREFS_NAME,MODE_PRIVATE)
-                                        .edit()
-                                        .putString(PREFS_ID, mLogin.getText().toString())
-                                        .commit();
+                            if(activityName.equals("LoginActivity")) {
+                                requestingActivity.setResult(RESULT_OK);
+                                requestingActivity.finish();
                             }
-                            setResult(RESULT_OK);
-                            finish();
-                        } catch(Exception e) {
-
+                            else {
+                                MainActivity.changeDrawerData(UserTransfer.mLoggedUser);
+                                Toast.makeText(requestingActivity, "Zalogowano jako: " + UserTransfer.mLoggedUser.getName(), Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                        catch(Exception e) {
+                            e.printStackTrace();
+                            Log.d("User Data Error",e.getMessage());
+                            Toast.makeText(BarterApp.getAppContext(),"Error getting user data",Toast.LENGTH_SHORT).show();
                         }
                     }
                 },
-                new Response.ErrorListener(){
+                new Response.ErrorListener() {
                     @Override
-                    public void onErrorResponse(VolleyError error){
-                        Toast.makeText(LoginActivity.this, "Login failed", Toast.LENGTH_SHORT).show();
+                    public void onErrorResponse(VolleyError error) {
+                        Log.d("VolleyError", error.getMessage());
                     }
-                }
-        );
+                }) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String>  params = new HashMap<String, String>();
+                params.put("Authorization", "Bearer "+UserTransfer.getToken());
+                return params;
+            }
+        };
         requestQueue.add(jsonObjectRequest);
     }
 }
