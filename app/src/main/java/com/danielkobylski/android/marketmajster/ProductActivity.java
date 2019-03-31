@@ -19,6 +19,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -37,7 +38,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -106,7 +109,11 @@ public class ProductActivity extends AppCompatActivity {
         mAddToFavourites.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                addToFavourites(UserTransfer.mLoggedUser, mProduct);
+                if (UserTransfer.mLoggedUser == null) {
+                    Intent intent = new Intent(ProductActivity.this, LoginActivity.class);
+                    startActivityForResult(intent, MainActivity.REQUEST_CODE_LOGIN);
+                }
+                else { addToFavourites(UserTransfer.mLoggedUser, mProduct); }
             }
         });
 
@@ -128,7 +135,7 @@ public class ProductActivity extends AppCompatActivity {
         RequestQueue requestQueue = Volley.newRequestQueue(ProductActivity.this);
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
                 Request.Method.GET,
-                URL+mProduct.getOwnerId(),
+                API.userData(mProduct.getOwnerId()), //URL+mProduct.getOwnerId(),
                 null,
                 new Response.Listener<JSONObject>() {
                     @Override
@@ -136,7 +143,7 @@ public class ProductActivity extends AppCompatActivity {
                         try {
                             mOwner = new User(response);
                             mOwnerName = (TextView)findViewById(R.id.user_name_text_view);
-                            mOwnerName.setText(mOwner.getName());
+                            mOwnerName.setText(mOwner.getName()!=null?mOwner.getName() : mOwner.getLogin());
 
                             mOwnerPhone = (TextView)findViewById(R.id.user_phone_text_view);
                             mOwnerPhone.setText(mOwner.getPhone());
@@ -157,7 +164,7 @@ public class ProductActivity extends AppCompatActivity {
                 new Response.ErrorListener(){
                     @Override
                     public void onErrorResponse(VolleyError error){
-                        //Log.d("Response error",error.getMessage());
+                        error.printStackTrace();
                         Toast.makeText(
                                 ProductActivity.this,
                                 "Error while getting owner data, " + URL+"products/latest",
@@ -173,7 +180,7 @@ public class ProductActivity extends AppCompatActivity {
         RequestQueue requestQueue = Volley.newRequestQueue(ProductActivity.this);
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
                 Request.Method.POST,
-                "http://192.168.0.17:8080/users/add/fav?userId=" + user.getId() + "&productId=" + product.getId(),
+                API.addToFavs(user.getId(), product.getId()),//"http://192.168.0.17:8080/users/add/fav?userId=" + user.getId() + "&productId=" + product.getId(),
                 null,
                 new Response.Listener<JSONObject>() {
                     @Override
@@ -189,10 +196,16 @@ public class ProductActivity extends AppCompatActivity {
                     @Override
                     public void onErrorResponse(VolleyError error){
                         Toast.makeText(ProductActivity.this, "Error when trying to add project to favourites", Toast.LENGTH_SHORT).show();
-                        Log.d("Volley error: ",error.getMessage());
+                        error.printStackTrace();
                     }
                 }
-        );
+        ) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String>  params = new HashMap<String, String>();
+                params.put("Authorization", "Bearer "+UserTransfer.getToken());
+                return params;
+            }};
         requestQueue.add(jsonObjectRequest);
     }
 

@@ -21,6 +21,10 @@ public class Image implements Parcelable {
         mContent = content;
     }
 
+    public Image(byte[] content) {
+        mContent = content;
+    }
+
     public Image(JSONObject image) {
 
         try {

@@ -52,6 +52,10 @@
                 android:icon="@drawable/ic_settings"
                 android:title="Ustawienia konta" />
             <item
+                android:id="@+id/change_password"
+                android:icon="@drawable/ic_security_black_24dp"
+                android:title="Zmień hasło" />
+            <item
                 android:id="@+id/logout"
                 android:icon="@drawable/ic_exit_to_app"
                 android:title="Wyloguj się" />

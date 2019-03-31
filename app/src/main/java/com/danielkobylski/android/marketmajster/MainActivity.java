@@ -71,7 +71,8 @@ public class MainActivity extends AppCompatActivity {
     private static Typeface typeface;
     private static int pageToLoad = 0;
     private static final int REQUEST_CODE_NEW_LOC = 3;
-    private static final int REQUEST_CODE_LOGIN = 4;
+    public static final int REQUEST_CODE_LOGIN = 4;
+    private static final int REQUEST_CODE_CHANGE_PASS = 5;
     private static TextView mLogoutTextView;
     private static TextView mLoginTextView;
     private static CircleImageView mLoginAvatar;
@@ -92,29 +93,18 @@ public class MainActivity extends AppCompatActivity {
 
         mDrawerLayout = findViewById(R.id.drawer_layout);
 
-
         mNavigationView = findViewById(R.id.nav_view);
         mLogo = mNavigationView.getHeaderView(0).findViewById(R.id.logo);
         mLogoutTextView = mNavigationView.getHeaderView(0).findViewById(R.id.drawer_text_logout);
         mLoginTextView = mNavigationView.getHeaderView(0).findViewById(R.id.drawer_text_login);
         mLoginAvatar = mNavigationView.getHeaderView(0).findViewById(R.id.login_avatar);
 
-        //SharedPreferences pref = getSharedPreferences(LoginActivity.PREFS_NAME,MODE_PRIVATE);
-        //String userId = pref.getString(LoginActivity.PREFS_ID, null);
-
         changeDrawerData(null);
-        //if (userId != null) {
-        //    getLoggedUser(userId);
-        //}
-
 
         mNavigationView.setNavigationItemSelectedListener(
                 new NavigationView.OnNavigationItemSelectedListener() {
                     @Override
                     public boolean onNavigationItemSelected(MenuItem menuItem) {
-                        // set item as selected to persist highlight
-                        //menuItem.setChecked(true);
-                        // close drawer when item is tapped
                         switch(menuItem.getItemId()) {
                             case R.id.login:
                                 mIntent = new Intent(MainActivity.this, LoginActivity.class);
@@ -128,7 +118,8 @@ public class MainActivity extends AppCompatActivity {
                                 changeDrawerData(null);
                                 break;
                             case R.id.add_offer:
-                                Toast.makeText(MainActivity.this, "Add offer", Toast.LENGTH_SHORT).show();
+                                mIntent = new Intent(MainActivity.this, NewOffertActivity.class);
+                                startActivity(mIntent);
                                 break;
                             case R.id.transactions:
                                 Toast.makeText(MainActivity.this, "Transactions", Toast.LENGTH_SHORT).show();
@@ -137,15 +128,15 @@ public class MainActivity extends AppCompatActivity {
                                 mIntent = new Intent(MainActivity.this, AccountConfigActivity.class);
                                 startActivity(mIntent);
                                 break;
+                            case R.id.change_password:
+                                mIntent = new Intent(MainActivity.this, PasswordChangeActivity.class);
+                                startActivityForResult(mIntent, REQUEST_CODE_CHANGE_PASS);
+                                break;
                         }
-
                         mDrawerLayout.closeDrawers();
                         return true;
                     }
                 });
-
-
-        //getLoggedUser();
 
         mSearchView = (SearchView) findViewById(R.id.main_search_bar);
 
@@ -180,7 +171,6 @@ public class MainActivity extends AppCompatActivity {
 
         LoginActivity.logRememberedUser(MainActivity.this);
         loadProductData();
-
 
         mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener()
         {
@@ -245,7 +235,7 @@ public class MainActivity extends AppCompatActivity {
         mSearchView.clearFocus();
         //loadProductData();
         mProductsAdapter.notifyDataSetChanged();
-        //mRecyclerView.setAdapter(mProductsAdapter);
+        changeDrawerData(UserTransfer.mLoggedUser);
     }
 
     @Override
@@ -278,6 +268,8 @@ public class MainActivity extends AppCompatActivity {
         }
         else if(requestCode == REQUEST_CODE_LOGIN) {
             changeDrawerData(UserTransfer.mLoggedUser);
+        }
+        else if(requestCode == REQUEST_CODE_CHANGE_PASS) {
         }
     }
 
@@ -321,10 +313,9 @@ public class MainActivity extends AppCompatActivity {
 
     public void loadProductData() {
         RequestQueue requestQueue = Volley.newRequestQueue(MainActivity.this);
-        Log.d("url@@@", URL+"products/search?param=&categoryId=-1&cityId=-1&voivoId=-1&page=" + pageToLoad + "&size=" + PAGE_SIZE);
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(
                 Request.Method.GET,
-                URL+"products/latest/all?page=" + pageToLoad + "&size=" + PAGE_SIZE,
+                API.productData(pageToLoad,PAGE_SIZE),
                 null,
                 new Response.Listener<JSONArray>() {
                     @Override

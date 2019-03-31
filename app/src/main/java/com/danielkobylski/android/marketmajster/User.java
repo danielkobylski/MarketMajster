@@ -44,7 +44,7 @@ public class User {
         mFavourites = favourites;
     }
 
-    User(JSONObject user) {
+    /*User(JSONObject user) {
         try {
             mId = Long.valueOf(user.getString("id"));
             mName = user.getString("forename");
@@ -68,7 +68,50 @@ public class User {
         } catch(JSONException e) {
             e.printStackTrace();
         }
+    }*/
 
+    User(JSONObject user) {
+        try {
+            mId = Long.valueOf(getJSONString(user,"id"));
+            mName = getJSONString(user,"forename");
+            mLastName = getJSONString(user,"surname");;
+            mLogin = getJSONString(user,"login");
+            mPassword = getJSONString(user,"password");
+            mEmail = getJSONString(user,"email");
+            mPhone = getJSONString(user,"phoneNumber");
+            mAddress = getJSONString(user,"address");
+            mCity = getJSONString(user,"city");
+            mZipcode = getJSONString(user,"zipCode");
+            mBirthDate = getJSONString(user,"birthDate");
+            mAvatarImage = new Image((long)-1,(long)-1,Base64.decode(getJSONString(user,"img"), Base64.DEFAULT));
+            mFavourites = new ArrayList<>();
+            JSONArray favs = user.getJSONArray("fav");
+            if (favs.length() != 0) {
+                for(int i = 0; i < favs.length(); i++) {
+                    mFavourites.add(new Product(favs.getJSONObject(i)));
+                }
+            }
+        } catch(JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private String getJSONString(JSONObject json, String tag) {
+        try {
+            return json.getString(tag);
+        }
+        catch(JSONException e) {
+            return null;
+        }
+    }
+
+    private JSONArray getJSONarray(JSONObject json, String tag) {
+        try {
+            return json.getJSONArray(tag);
+        }
+        catch(JSONException e) {
+            return null;
+        }
     }
 
     public Long getId() {

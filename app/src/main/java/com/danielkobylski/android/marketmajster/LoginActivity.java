@@ -46,10 +46,6 @@ public class LoginActivity extends AppCompatActivity {
     private static CheckBox mRememberMe;
     private static JSONObject mLoginData;
     public static final String PREFS_NAME = "barter";
-    private static boolean userLogged;
-    private static final String URL1 = "http://192.168.0.17:8080/";
-    private static final String URL2 = "http://s12.mydevil.net:8080/barter/";
-    //public static final String PREFS_LOGIN = "16";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -119,7 +115,8 @@ public class LoginActivity extends AppCompatActivity {
     public static void getAccessToken(final JSONObject loginData, final boolean rememberMe, final Activity requestingActivity) {
 
         RequestQueue requestQueue = Volley.newRequestQueue(BarterApp.getAppContext());
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST,URL2+"api/auth/signin",loginData,
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST,"http://192.168.0.17:8080/api/auth/signin",//API.TOKEN,
+                loginData,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
@@ -168,7 +165,8 @@ public class LoginActivity extends AppCompatActivity {
     public static void getCurrentUser(final Activity requestingActivity) {
         final String activityName = requestingActivity.getLocalClassName();
         RequestQueue requestQueue = Volley.newRequestQueue(BarterApp.getAppContext());
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET,URL2+"users/current",null,
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET,"http://192.168.0.17:8080/users/current",//API.CURRENT_USER,
+                null,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
@@ -193,7 +191,7 @@ public class LoginActivity extends AppCompatActivity {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Log.d("VolleyError", error.getMessage());
+                        error.printStackTrace();
                     }
                 }) {
             @Override
@@ -204,5 +202,12 @@ public class LoginActivity extends AppCompatActivity {
             }
         };
         requestQueue.add(jsonObjectRequest);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode != Activity.RESULT_OK) {
+            return;
+        }
     }
 }

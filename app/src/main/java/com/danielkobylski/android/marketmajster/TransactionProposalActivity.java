@@ -1,5 +1,7 @@
 package com.danielkobylski.android.marketmajster;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.design.widget.TextInputEditText;
@@ -13,6 +15,7 @@ import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -27,7 +30,9 @@ import org.json.JSONObject;
 import org.w3c.dom.Text;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -74,18 +79,19 @@ public class TransactionProposalActivity extends AppCompatActivity {
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
         mRecyclerView.setAdapter(mProductsAdapter);
 
-        //IF THE USER IS NOT LOGGED, PROMPT LOGINACTIVITY
-
-        initUserProductData();
-
+        if (UserTransfer.mLoggedUser == null) {
+            Intent intent = new Intent(TransactionProposalActivity.this, LoginActivity.class);
+            startActivityForResult(intent, MainActivity.REQUEST_CODE_LOGIN);
+        }
+        else { initUserProductData(); }
     }
-
+//UserTransfer.mLoggedUser.getId())
     public void initUserProductData() {
         RequestQueue requestQueue = Volley.newRequestQueue(TransactionProposalActivity.this);
         mProductList.clear();
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
                 Request.Method.GET,
-                "http://192.168.0.17:8080/products/owner?ownerId=" + UserTransfer.mLoggedUser.getId() + "&active=true",
+                API.userProducts(UserTransfer.mLoggedUser.getId()),//"http://192.168.0.17:8080/products/owner?ownerId=" + UserTransfer.mLoggedUser.getId() + "&active=true",
                 null,
                 new Response.Listener<JSONObject>() {
                     @Override
@@ -111,11 +117,25 @@ public class TransactionProposalActivity extends AppCompatActivity {
                                 "http://192.168.0.17:8080/products/owner?ownerId=" + UserTransfer.mLoggedUser.getId() + "&active=true",
                                 Toast.LENGTH_LONG
                         ).show();
-                        Log.d("Volley error: ",error.getMessage());
+                        error.printStackTrace();
                     }
                 }
-        );
+        ) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String>  params = new HashMap<String, String>();
+                params.put("Authorization", "Bearer "+UserTransfer.getToken());
+                return params;
+            }};
         requestQueue.add(jsonObjectRequest);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode != Activity.RESULT_OK) {
+            return;
+        }
+        initUserProductData();
     }
 
 }
