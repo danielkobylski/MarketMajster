@@ -217,5 +217,19 @@ public class User {
     public void setFavourites(List<Product> favourites) {
         mFavourites = favourites;
     }
+
+    public void removeFavourite(Product p) {
+        for (Product fav: mFavourites) {
+            if (p.getId() == fav.getId()) {
+                mFavourites.remove(fav);
+                break;
+            }
+        }
+    }
+
+    public void addFavourite(Product p) {
+        mFavourites.add(p);
+    }
+
 }
 

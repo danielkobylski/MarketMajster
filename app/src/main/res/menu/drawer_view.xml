@@ -33,7 +33,7 @@
 
         <group android:id="@+id/group_offers">
             <item
-                android:id="@+id/offers"
+                android:id="@+id/offerts"
                 android:icon="@drawable/ic_business_center"
                 android:title="Moje oferty" />
             <item

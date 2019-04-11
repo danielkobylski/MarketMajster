@@ -60,6 +60,7 @@ public class ProductActivity extends AppCompatActivity {
     private TextView mOwnerEmail;
     private User mOwner;
     private ButtonFlat mMoreOffers;
+    private boolean mAlreadyLiked;
     private static final String URL = "http://192.168.0.17:8080/users/find/";
 
     @Override
@@ -79,6 +80,15 @@ public class ProductActivity extends AppCompatActivity {
         }
 
         getUser();
+
+        if (UserTransfer.mLoggedUser != null) {
+            for(Product p: UserTransfer.mLoggedUser.getFavourites()) {
+                if (p.getId() == mProduct.getId()) {
+                    mAlreadyLiked = true;
+                    break;
+                }
+            }
+        }
 
         mCreationDate = (TextView)findViewById(R.id.product_creation_date_text_view);
         mCreationDate.setText(mCreationDate.getText() + mProduct.getCreationDate());
@@ -113,7 +123,20 @@ public class ProductActivity extends AppCompatActivity {
                     Intent intent = new Intent(ProductActivity.this, LoginActivity.class);
                     startActivityForResult(intent, MainActivity.REQUEST_CODE_LOGIN);
                 }
-                else { addToFavourites(UserTransfer.mLoggedUser, mProduct); }
+                else {
+                    if (mAlreadyLiked == true) {
+                        Toast.makeText(ProductActivity.this, "Już śledzisz ten produkt!", Toast.LENGTH_LONG).show();
+                    }
+                    else if(UserTransfer.mLoggedUser.getId() == mOwner.getId()) {
+                        Toast.makeText(ProductActivity.this, "To jest Twój produkt!", Toast.LENGTH_LONG).show();
+                    }
+                    else {
+                        addToFavourites(mOwner, mProduct);
+                        UserTransfer.mLoggedUser.addFavourite(mProduct);
+                        mAlreadyLiked = true;
+                    }
+                }
+
             }
         });
 
@@ -180,7 +203,7 @@ public class ProductActivity extends AppCompatActivity {
         RequestQueue requestQueue = Volley.newRequestQueue(ProductActivity.this);
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
                 Request.Method.POST,
-                API.addToFavs(user.getId(), product.getId()),//"http://192.168.0.17:8080/users/add/fav?userId=" + user.getId() + "&productId=" + product.getId(),
+                API.addToFavs(user.getId(), product.getId()),
                 null,
                 new Response.Listener<JSONObject>() {
                     @Override

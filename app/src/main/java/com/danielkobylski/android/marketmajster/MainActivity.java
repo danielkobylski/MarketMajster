@@ -132,6 +132,10 @@ public class MainActivity extends AppCompatActivity {
                                 mIntent = new Intent(MainActivity.this, PasswordChangeActivity.class);
                                 startActivityForResult(mIntent, REQUEST_CODE_CHANGE_PASS);
                                 break;
+                            case R.id.offerts:
+                                mIntent = new Intent(MainActivity.this, UserOffertsActivity.class);
+                                startActivity(mIntent);
+                                break;
                         }
                         mDrawerLayout.closeDrawers();
                         return true;

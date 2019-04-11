@@ -61,7 +61,6 @@ public class ProductProposalAdapter extends RecyclerView.Adapter<ProductProposal
         return position;
     }
 
-
     @Override
     public int getItemCount() {
         return mProductList.size();
@@ -106,4 +105,3 @@ public class ProductProposalAdapter extends RecyclerView.Adapter<ProductProposal
     }
 
 }
-

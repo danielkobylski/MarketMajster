@@ -53,8 +53,10 @@
         <activity
             android:name=".PasswordChangeActivity"
             android:label="Zmiana hasła" />
-        <activity android:name=".NewOffertActivity"
-            android:label="Nowa oferta"></activity>
+        <activity
+            android:name=".NewOffertActivity"
+            android:label="Nowa oferta" />
+        <activity android:name=".UserOffertsActivity"></activity>
     </application>
 
 </manifest>
