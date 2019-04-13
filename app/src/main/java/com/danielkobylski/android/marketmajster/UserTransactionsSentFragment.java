@@ -8,8 +8,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
@@ -17,56 +15,56 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class UserOffertsFragment extends Fragment {
+public class UserTransactionsSentFragment extends Fragment {
 
-    private List<Product> mProductList = new ArrayList<>();
+    private List<Transaction> mTransactionList;
     private RecyclerView mRecyclerView;
-    private UserOffertAdapter mOffertAdapter;
+    private TransactionsSentAdapter mAdapter;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        View v = inflater.inflate(R.layout.fragment_user_offerts, container, false);
+        View v = inflater.inflate(R.layout.fragment_transactions, container, false);
 
-        mRecyclerView = (RecyclerView) v.findViewById(R.id.user_offerts_recycler_view);
-        mOffertAdapter = new UserOffertAdapter(mProductList);
+        mTransactionList = new ArrayList<>();
+        mRecyclerView = (RecyclerView) v.findViewById(R.id.recycler_view);
+        mAdapter = new TransactionsSentAdapter(mTransactionList);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity().getApplicationContext()));
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
+        mRecyclerView.setAdapter(mAdapter);
 
-        initUserProductData();
+        getSentTransactions();
 
+        mAdapter.notifyDataSetChanged();
         return v;
     }
-    public void initUserProductData() {
+
+    public void getSentTransactions() {
         RequestQueue requestQueue = Volley.newRequestQueue(getContext().getApplicationContext());
-        mProductList.clear();
+        mTransactionList.clear();
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(
                 Request.Method.GET,
-                API.userProducts(UserTransfer.mLoggedUser.getId()),//"http://192.168.0.17:8080/products/owner?ownerId=" + UserTransfer.mLoggedUser.getId() + "&active=true",
+                API.sentTransactions(UserTransfer.mLoggedUser.getId()),
                 null,
                 new Response.Listener<JSONArray>() {
                     @Override
                     public void onResponse(JSONArray response) {
                         try {
-                            //JSONArray products = response.getJSONArray("content");
                             for (int i = 0; i < response.length(); i++) {
-                                mProductList.add(new Product(response.getJSONObject(i)));
-                                mOffertAdapter.notifyDataSetChanged();
+                                mTransactionList.add(new Transaction(response.getJSONObject(i)));
+                                mAdapter.notifyDataSetChanged();
                             }
-                            mRecyclerView.setAdapter(mOffertAdapter);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }

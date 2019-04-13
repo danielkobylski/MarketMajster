@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -18,6 +19,7 @@ import com.gc.materialdesign.views.ButtonFlat;
 
 import org.w3c.dom.Text;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -25,9 +27,11 @@ import de.hdodenhof.circleimageview.CircleImageView;
 public class ProductProposalAdapter extends RecyclerView.Adapter<ProductProposalAdapter.ProductProposalViewHolder> {
 
     private List<Product> mProductList;
+    private boolean mEnabled;
 
-    public ProductProposalAdapter(List<Product> productList) {
+    public ProductProposalAdapter(List<Product> productList, boolean enabled) {
         this.mProductList = productList;
+        mEnabled = enabled;
     }
 
     @Override
@@ -43,7 +47,6 @@ public class ProductProposalAdapter extends RecyclerView.Adapter<ProductProposal
         if (mProductList.get(position).getImageList().size() != 0) {
             byte[] bmpArr = mProductList.get(position).getImageList().get(0).getContent();
             Bitmap bmp = BitmapFactory.decodeByteArray(bmpArr, 0, bmpArr.length);
-            Log.d("Somethings", "asdf");
             holder.imageView.setImageBitmap(bmp);
             holder.imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
         }
@@ -84,6 +87,10 @@ public class ProductProposalAdapter extends RecyclerView.Adapter<ProductProposal
             textView = (TextView)view.findViewById(R.id.transaction_proposal_item_name_text_view);
             button = (ButtonFlat)view.findViewById(R.id.transaction_proposal_view_product_button);
 
+            if (mEnabled == false) {
+                checkBox.setVisibility(View.GONE);
+            }
+
             button.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -98,6 +105,13 @@ public class ProductProposalAdapter extends RecyclerView.Adapter<ProductProposal
                 @Override
                 public void onClick(View v) {
                     checkBox.setChecked(!checkBox.isChecked());
+                }
+            });
+
+            checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    //Toast.makeText(buttonView.getContext(), "asd", Toast.LENGTH_LONG).show();
                 }
             });
 

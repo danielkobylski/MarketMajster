@@ -85,6 +85,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Intent intent = new Intent(MainActivity.this, TransactionNewActivity.class);
+        startActivity(intent);
+
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         ActionBar actionbar = getSupportActionBar();
@@ -122,7 +125,8 @@ public class MainActivity extends AppCompatActivity {
                                 startActivity(mIntent);
                                 break;
                             case R.id.transactions:
-                                Toast.makeText(MainActivity.this, "Transactions", Toast.LENGTH_SHORT).show();
+                                mIntent = new Intent(MainActivity.this, UserTransactionsActivity.class);
+                                startActivity(mIntent);
                                 break;
                             case R.id.account_settings:
                                 mIntent = new Intent(MainActivity.this, AccountConfigActivity.class);

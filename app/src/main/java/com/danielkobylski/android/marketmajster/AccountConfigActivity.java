@@ -222,8 +222,8 @@ public class AccountConfigActivity extends AppCompatActivity {
             avatarData.put("file", mImageString);
             avatarData.put("id", mUser.getId());
             avatarData.put("type", mImageType);
-
         }
+
         catch(JSONException e) {}
         RequestQueue requestQueue = Volley.newRequestQueue(BarterApp.getAppContext());
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST,API.AVATAR,avatarData,
@@ -259,7 +259,4 @@ public class AccountConfigActivity extends AppCompatActivity {
         };
         requestQueue.add(jsonObjectRequest);
     }
-
-
-
 }

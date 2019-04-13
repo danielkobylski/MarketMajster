@@ -233,7 +233,16 @@ public class NewOffertActivity extends AppCompatActivity {
             public void onErrorResponse(VolleyError error) {
                 error.printStackTrace();
             }
-        });
+        })
+        {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String>  params = new HashMap<String, String>();
+                params.put("Authorization", "Bearer "+UserTransfer.getToken());
+                params.put("Cookie", UserTransfer.getJSessionID());
+                return params;
+            }
+        };
         requestQueue.add(stringRequest);
     }
 
@@ -263,6 +272,7 @@ public class NewOffertActivity extends AppCompatActivity {
             public Map<String, String> getHeaders() throws AuthFailureError {
                 Map<String, String>  params = new HashMap<String, String>();
                 params.put("Authorization", "Bearer "+UserTransfer.getToken());
+                params.put("Cookie", UserTransfer.getJSessionID());
                 return params;
             }
         };
@@ -271,7 +281,7 @@ public class NewOffertActivity extends AppCompatActivity {
 
     private void submitNewOffert(String url) {
         JSONObject offertData = new JSONObject();
-
+        JSONObject emptydata = new JSONObject();
         try {
             offertData.put("name", mOffertName.getText().toString());
             offertData.put("description", mDescription.getText().toString());
@@ -283,7 +293,9 @@ public class NewOffertActivity extends AppCompatActivity {
                 offertData.put("active", "true");
             }
         }
+
         catch(JSONException e) {}
+
         RequestQueue requestQueue = Volley.newRequestQueue(BarterApp.getAppContext());
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(mNewOrEdit+1,url,offertData, //1 is POST, 2 is PUT => mNewOrEdit is 0 if new offert and 1 otherwise, therefore mNewOrEdit + 1
                 new Response.Listener<JSONObject>() {
@@ -312,8 +324,10 @@ public class NewOffertActivity extends AppCompatActivity {
             public Map<String, String> getHeaders() throws AuthFailureError {
                 Map<String, String>  params = new HashMap<String, String>();
                 params.put("Authorization", "Bearer "+UserTransfer.getToken());
+                params.put("Cookie", UserTransfer.getJSessionID());
                 return params;
             }
+
 
         };
         requestQueue.add(jsonObjectRequest);

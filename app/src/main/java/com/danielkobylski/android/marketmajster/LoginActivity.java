@@ -16,6 +16,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
+import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -114,13 +115,13 @@ public class LoginActivity extends AppCompatActivity {
 
     public static void getAccessToken(final JSONObject loginData, final boolean rememberMe, final Activity requestingActivity) {
 
-        RequestQueue requestQueue = Volley.newRequestQueue(BarterApp.getAppContext());
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST,"http://192.168.0.17:8080/api/auth/signin",//API.TOKEN,
-                loginData,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        try {
+                            RequestQueue requestQueue = Volley.newRequestQueue(BarterApp.getAppContext());
+                            JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST,"http://192.168.0.17:8080/api/auth/signin",//API.TOKEN,
+                                    loginData,
+                                    new Response.Listener<JSONObject>() {
+                                        @Override
+                                        public void onResponse(JSONObject response) {
+                                            try {
                             Log.d("Response",response.getString("accessToken"));
                             UserTransfer.setToken(response.getString("accessToken"));
                             if(rememberMe == true) {
@@ -156,6 +157,18 @@ public class LoginActivity extends AppCompatActivity {
                 Map<String, String>  params = new HashMap<String, String>();
                 params.put("Authorization", "Bearer "+UserTransfer.getToken());
                 return params;
+            }
+
+            @Override
+            protected Response<JSONObject> parseNetworkResponse(NetworkResponse response) {
+                // since we don't know which of the two underlying network vehicles
+                // will Volley use, we have to handle and store session cookies manually
+                Log.i("response",response.headers.toString());
+                Map<String, String> responseHeaders = response.headers;
+                String rawCookies = response.headers.get("Set-Cookie");
+                String JSessionID = rawCookies.substring(0,rawCookies.indexOf(";")); //rawCookies.indexOf("=")+1
+                UserTransfer.setJSessionID(rawCookies.substring(0,rawCookies.indexOf(";")));
+                return super.parseNetworkResponse(response);
             }
 
         };
@@ -198,6 +211,7 @@ public class LoginActivity extends AppCompatActivity {
             public Map<String, String> getHeaders() throws AuthFailureError {
                 Map<String, String>  params = new HashMap<String, String>();
                 params.put("Authorization", "Bearer "+UserTransfer.getToken());
+                params.put("Cookie", UserTransfer.getJSessionID());
                 return params;
             }
         };

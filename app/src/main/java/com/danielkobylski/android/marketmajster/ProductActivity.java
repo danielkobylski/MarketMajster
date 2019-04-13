@@ -144,14 +144,58 @@ public class ProductActivity extends AppCompatActivity {
         mStartTransaction.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ProductTransfer.setOffert(mProduct);
-                UserTransfer.setOffertOwner(mOwner);
-                Intent intent = new Intent(ProductActivity.this, TransactionProposalActivity.class);
-                startActivity(intent);
+                if (UserTransfer.mLoggedUser == null) {
+                    Intent intent = new Intent(ProductActivity.this, LoginActivity.class);
+                    startActivityForResult(intent, MainActivity.REQUEST_CODE_LOGIN);
+                }
+                else if(UserTransfer.mLoggedUser.getId() == mOwner.getId()) {
+                    Toast.makeText(ProductActivity.this, "To jest Twój produkt!", Toast.LENGTH_LONG).show();
+                }
+                else {
+                    checkIfTransactionExists();
+                }
             }
         });
+    }
 
-
+    private void checkIfTransactionExists() {
+        RequestQueue requestQueue = Volley.newRequestQueue(BarterApp.getAppContext());
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET,API.transactionExists(UserTransfer.mLoggedUser.getId(), mProduct.getId()),null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            if (response.has("errorMsg")) {
+                                Toast.makeText(ProductActivity.this, "Już wysłałeś zapytanie o ten produkt.", Toast.LENGTH_LONG).show();
+                            }
+                            else {
+                                ProductTransfer.setOffert(mProduct);
+                                UserTransfer.setOffertOwner(mOwner);
+                                Intent intent = new Intent(ProductActivity.this, TransactionProposalActivity.class);
+                                startActivity(intent);
+                            }
+                        }
+                        catch(Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(ProductActivity.this, "Wystąpił błąd", Toast.LENGTH_LONG).show();
+                        error.printStackTrace();
+                    }
+                }) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String>  params = new HashMap<String, String>();
+                params.put("Authorization", "Bearer "+UserTransfer.getToken());
+                //params.put("Cookie", UserTransfer.getJSessionID());
+                return params;
+            }
+        };
+        requestQueue.add(jsonObjectRequest);
     }
 
     private void getUser() {

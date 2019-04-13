@@ -11,10 +11,12 @@ import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 
@@ -24,7 +26,9 @@ import org.json.JSONObject;
 import org.w3c.dom.Text;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -64,17 +68,17 @@ public class UserProductsActivity extends AppCompatActivity {
     public void initUserProductData() {
         RequestQueue requestQueue = Volley.newRequestQueue(UserProductsActivity.this);
         mProductList.clear();
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(
                 Request.Method.GET,
-                "http://192.168.0.17:8080/products/owner?ownerId=" + UserTransfer.getOffertOwner().getId() + "&active=true",
+                API.otherProducts(UserTransfer.getOffertOwner().getId(), ProductTransfer.getProduct().getId()),
                 null,
-                new Response.Listener<JSONObject>() {
+                new Response.Listener<JSONArray>() {
                     @Override
-                    public void onResponse(JSONObject response) {
+                    public void onResponse(JSONArray response) {
                         try {
-                            JSONArray products = response.getJSONArray("content");
-                            for (int i = 0; i < products.length(); i++) {
-                                mProductList.add(new Product(products.getJSONObject(i)));
+                            //JSONArray products = response.getJSONArray("content");
+                            for (int i = 0; i < response.length(); i++) {
+                                mProductList.add(new Product(response.getJSONObject(i)));
                                 mProductsAdapter.notifyDataSetChanged();
                             }
                             mRecyclerView.setAdapter(mProductsAdapter);
@@ -86,16 +90,17 @@ public class UserProductsActivity extends AppCompatActivity {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        //Log.d("Response error",error.getMessage());
-                        Toast.makeText(
-                                UserProductsActivity.this,
-                                "http://192.168.0.17:8080/products/owner?ownerId=" + UserTransfer.mLoggedUser.getId() + "&active=true",
-                                Toast.LENGTH_LONG
-                        ).show();
-                        Log.d("Volley error: ",error.getMessage());
+                        error.printStackTrace();
                     }
                 }
-        );
-        requestQueue.add(jsonObjectRequest);
+        ){
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String>  params = new HashMap<String, String>();
+                params.put("Authorization", "Bearer "+UserTransfer.getToken());
+                params.put("Cookie", UserTransfer.getJSessionID());
+                return params;
+            }};
+        requestQueue.add(jsonArrayRequest);
     }
 }
