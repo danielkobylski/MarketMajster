@@ -40,15 +40,17 @@
 
             <TextView
                 android:id="@+id/transaction_proposal_item_name_text_view"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
                 android:layout_marginBottom="8dp"
                 android:text="Placeholder"
                 android:textColor="@android:color/black"
                 android:textSize="16dp"
                 app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/transaction_proposal_view_product_button"
                 app:layout_constraintStart_toEndOf="@+id/transaction_proposal_item_preview"
                 app:layout_constraintTop_toTopOf="parent" />
 

@@ -25,7 +25,7 @@ public class TransactionState {
 
     TransactionState(JSONObject transactionState) {
         try {
-            mId = transactionState.getLong("id");
+            //mId = transactionState.getLong("id");
             mOfferId = transactionState.getLong("offerId");
             mTransactionId = transactionState.getLong("transactionId");
             mSellerAccept = transactionState.getBoolean("sellerAccept");

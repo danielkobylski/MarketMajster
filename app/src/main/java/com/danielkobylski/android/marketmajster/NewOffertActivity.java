@@ -281,7 +281,6 @@ public class NewOffertActivity extends AppCompatActivity {
 
     private void submitNewOffert(String url) {
         JSONObject offertData = new JSONObject();
-        JSONObject emptydata = new JSONObject();
         try {
             offertData.put("name", mOffertName.getText().toString());
             offertData.put("description", mDescription.getText().toString());

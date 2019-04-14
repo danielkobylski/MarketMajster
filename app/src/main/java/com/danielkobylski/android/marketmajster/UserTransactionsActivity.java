@@ -10,6 +10,7 @@ import android.os.Bundle;
 public class UserTransactionsActivity extends AppCompatActivity {
 
     public static final int REQUEST_CODE_CANCEL_TRANSACTION = 3;
+    public static final int REQUEST_CODE_WORK_TRANSACTION = 4;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,7 +40,7 @@ public class UserTransactionsActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == Activity.RESULT_OK) {
-            if (requestCode == REQUEST_CODE_CANCEL_TRANSACTION) {
+            if (requestCode == REQUEST_CODE_CANCEL_TRANSACTION || requestCode == REQUEST_CODE_WORK_TRANSACTION) {
                 recreate();
             }
         }

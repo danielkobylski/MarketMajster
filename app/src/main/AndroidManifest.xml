@@ -61,8 +61,11 @@
         <activity
             android:name=".TransactionSentActivity"
             android:windowSoftInputMode="stateAlwaysHidden" />
-        <activity android:name=".TransactionNewActivity" />
-        <activity android:name=".test_activity"></activity>
+        <activity
+            android:name=".TransactionNewActivity"
+            android:windowSoftInputMode="stateAlwaysHidden" />
+        <activity android:name=".test_activity" />
+        <activity android:name=".ChooseOtherActivity"></activity>
     </application>
 
 </manifest>

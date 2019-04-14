@@ -2,11 +2,14 @@ package com.danielkobylski.android.marketmajster;
 
 import com.danielkobylski.android.marketmajster.Product;
 
+import java.util.List;
+
 public class ProductTransfer {
 
     public static Product mProduct;
     public static Product mOffert;
     public static Product mProductPreview;
+    public static List<Product> mOtherProducts;
 
     public static void setProduct (Product product) {
         mProduct = product;
@@ -30,6 +33,12 @@ public class ProductTransfer {
 
     public static Product getProductPreview () {
         return mProductPreview;
+    }
+
+    public static List<Product> getOtherProducts() {return mOtherProducts;}
+
+    public static void setOtherProducts(List<Product> otherProducts) {
+        mOtherProducts = otherProducts;
     }
 
 }

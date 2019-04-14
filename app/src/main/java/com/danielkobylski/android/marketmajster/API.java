@@ -16,6 +16,9 @@ public class API {
     public static final String PRODUCT_LIST = URL_LOCAL + "products/list";
     public static final String VOIVODESHIPS = URL+"voivo/all";
     public static final String CITIES = URL+"city/all";
+    public static final String TRANSACTION_REPLY = URL_LOCAL + "send/message";
+    public static final String TRANSACTION_SESSION_CLEAR = URL_LOCAL + "transaction/clear/session";
+    public static final String TRANSACTION_SAVE_ANOTHER = URL_LOCAL + "transaction/save/offer/another";
     public static String productData(int pageToLoad,int pageSize) {
         return URL_LOCAL+"products/latest/all?page=" + pageToLoad + "&size=" + pageSize;
     }
@@ -82,6 +85,35 @@ public class API {
 
     public static String productsList(String productList) {
         return URL_LOCAL + "products/list?ids=" + productList;
+    }
+
+    public static String rejectActiveTransaction(long offerId) {
+        return URL_LOCAL + "transaction/reject?id="+offerId;
+    }
+
+    public static String acceptTransaction(long transactionId, String userSide) {
+        //additionaly pass JSON with transactionState
+        return URL_LOCAL + "transaction/success/end?id=" + transactionId + "&userSide=" + userSide;
+    }
+
+    public static String userItemAccept(long offerId, String userSide) {
+        return URL_LOCAL + "accept/owner/side/offer?offerId="+offerId+"&side=" + userSide;
+    }
+
+    public static String transactionOtherProducts(long ownerId) {
+        return URL_LOCAL + "auth/products/owner/another?ownerId=" + ownerId;
+    }
+
+    public static String transactionNewOfferList(long transactionId) {
+        return URL_LOCAL + "transaction/offer/list?transactionId="+transactionId;
+    }
+
+    public static String transactionActiveOfferList(long transactionId) {
+        return URL_LOCAL + "transaction/active/offer/list?transactionId="+transactionId;
+    }
+
+    public static String removeTransactionItem(long offerId) {
+        return URL_LOCAL + "transaction/delete/offer?offerId=" + offerId;
     }
 
 }
